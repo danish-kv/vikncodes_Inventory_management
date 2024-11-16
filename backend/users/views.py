@@ -32,7 +32,31 @@ class CustomTokenObtainPairView(TokenObtainPairView):
 
 
 
+class OTPVerifiy(APIView):
+    def post(self, request):
+        email = request.data.get('email')
+        otp = request.data.get('otp')
+        print(email,otp)
 
+        try:
+            user = CustomUser.objects.get(email=email)
+        except CustomUser.DoesNotExist:
+            return Response(data='User not found', status=status.HTTP_404_NOT_FOUND)
+        
+        if not user.otp:
+            return Response(data='OTP is expired', status=status.HTTP_400_BAD_REQUEST)
+        
+        print('user opt', otp)
+        print('og otp', user.otp)
+        print(type(user.otp), type(otp))
+
+        if user.otp == int(otp):
+            user.otp = None
+            user.is_verified = True
+            user.save()
+            return Response(data='OTP verified successfully', status=status.HTTP_200_OK)
+        return Response(data='Invalid OTP', status=status.HTTP_400_BAD_REQUEST)
+    
 
 class Logout(APIView):
     def post(self, request):

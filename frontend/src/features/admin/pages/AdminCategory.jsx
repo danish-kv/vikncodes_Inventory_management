@@ -69,7 +69,7 @@ const AdminCategory = () => {
   return (
     <div className="min-h-screen bg-gradient-to-b from-indigo-50 to-purple-50">
       {/* Header Section */}
-      <div className="mb-8">
+      <div className="p-6 space-y-6">
         <h1 className="text-2xl font-bold text-gray-800 mb-2">
           Category Management
         </h1>

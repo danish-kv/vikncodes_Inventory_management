@@ -1,14 +1,30 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Search, User } from "lucide-react";
 import api from "../../../services/api";
 import useUsers from "../hooks/useUsers";
 import { dateFormat } from "../../../utils/dateformat";
+import Pagination from "../components/Pagination";
 
 const AdminUsers = () => {
   const { users, getUsers, loading } = useUsers();
   const [searchTerm, setSearchTerm] = useState("");
+  const [currentPage, setCurrentPage] = useState(1);
+
 
   console.log(users);
+
+  const handlePageChange = (page) => {
+    setCurrentPage(page);
+    getUsers(searchTerm, page);
+  };
+
+  useEffect(() => {
+    const delay = setTimeout(() => {
+      getUsers(searchTerm);
+    }, 500);
+
+    return () => clearTimeout(delay);
+  }, [searchTerm]);
 
   const handleBlock = async (id, current_status) => {
     try {
@@ -22,17 +38,10 @@ const AdminUsers = () => {
     }
   };
 
-  const filteredUsers = users.filter((user) => {
-    const matchesSearch =
-      user.username.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      user.email.toLowerCase().includes(searchTerm.toLowerCase());
-    return matchesSearch;
-  });
-
   return (
     <div className="min-h-screen bg-gradient-to-b from-indigo-50 to-purple-50">
       {/* Header Section */}
-      <div className="mb-8">
+      <div className="p-6 space-y-6">
         <h1 className="text-2xl font-bold text-gray-800 mb-2">
           User Management
         </h1>
@@ -57,7 +66,7 @@ const AdminUsers = () => {
                 placeholder="Search users..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
               />
             </div>
           </div>
@@ -87,7 +96,7 @@ const AdminUsers = () => {
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-100">
-              {filteredUsers.map((user) => (
+              {users.map((user) => (
                 <tr key={user.id} className="hover:bg-gray-50">
                   <td className="px-6 py-4">
                     <div className="flex items-center gap-3">
@@ -158,6 +167,7 @@ const AdminUsers = () => {
               ))}
             </tbody>
           </table>
+
         </div>
       </div>
     </div>

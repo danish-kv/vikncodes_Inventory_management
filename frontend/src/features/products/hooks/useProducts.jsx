@@ -6,10 +6,10 @@ const useProducts = () => {
   const [loading, setLoading] = useState(false);
   const [errors, setErrors] = useState(null);
 
-  const getProducts = async () => {
+  const getProducts = async (searchTerm='') => {
     setLoading(true);
     try {
-      const data = await fetchProducts();
+      const data = await fetchProducts(searchTerm);
       setProducts(data);
       console.log(data);
       

@@ -24,7 +24,7 @@ const AdminSidebar = ({ isOpen }) => {
   const location = useLocation();
   
   const menuItems = [
-    { icon: Package, label: "Products", path: "/admin/products" },
+    { icon: Package, label: "Products", path: "/admin" },
     { icon: Users, label: "Users", path: "/admin/users" },
     { icon: Grid, label: "Categories", path: "/admin/categories" },
   ];

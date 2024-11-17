@@ -12,6 +12,7 @@ import AdminLayout from "./features/admin/layout/AdminLayout";
 import AdminCategory from "./features/admin/pages/AdminCategory";
 import AdminUsers from "./features/admin/pages/AdminUsers";
 import AdminProducts from "./features/admin/pages/AdminProducts";
+import ProductDetails from "./features/admin/pages/ProductDetails";
 
 const App = () => {
   return (
@@ -28,8 +29,8 @@ const App = () => {
 
         <Route path="/admin/login" element={<AdminLoginPage />} />
         <Route path="/admin/users" element={<AdminLayout ><AdminUsers /></AdminLayout>} />
-        <Route path="/admin/products" element={<AdminLayout ><AdminProducts /></AdminLayout>} />
-        {/* <Route path="/admin/products" element={<AdminLayout ><AdminProductD /></AdminLayout>} /> */}
+        <Route path="/admin" element={<AdminLayout ><AdminProducts /></AdminLayout>} />
+        <Route path="/admin/product/:slug" element={<AdminLayout ><ProductDetails /></AdminLayout>} />
         <Route path="/admin/categories" element={<AdminLayout ><AdminCategory /></AdminLayout>} />
 
 

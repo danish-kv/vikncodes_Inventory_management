@@ -1,7 +1,16 @@
-import React from 'react';
-import { Package, ChevronDown, Menu } from 'lucide-react';
+import React, { useState } from "react";
+import { Package, ChevronDown, Menu } from "lucide-react";
+import { useDispatch } from "react-redux";
+import { LogoutThunk } from "../../../redux/thunk/authThunk";
 
-const AdminHeader = ({ toggleSidebar, isSidebarOpen }) => {
+const AdminHeader = ({ toggleSidebar }) => {
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const dispatch = useDispatch()
+
+  const toggleDropdown = () => {
+    setIsDropdownOpen(!isDropdownOpen);
+  };
+
   return (
     <header className="bg-white shadow-sm fixed w-full z-20">
       <div className="max-w-full mx-auto px-4">
@@ -13,7 +22,7 @@ const AdminHeader = ({ toggleSidebar, isSidebarOpen }) => {
             >
               <Menu className="h-6 w-6" />
             </button>
-            
+
             <div className="flex items-center ml-4">
               <Package className="h-8 w-8 text-indigo-600" />
               <span className="ml-2 text-xl font-bold text-gray-900 hidden sm:block">
@@ -24,25 +33,30 @@ const AdminHeader = ({ toggleSidebar, isSidebarOpen }) => {
 
           <div className="flex items-center">
             <div className="relative">
-              <button className="flex items-center space-x-3 hover:bg-gray-50 rounded-lg p-2">
+              <button
+                onClick={toggleDropdown}
+                className="flex items-center space-x-3 hover:bg-gray-50 rounded-lg p-2"
+              >
                 <div className="h-7 w-7 bg-gradient-to-r from-indigo-600 to-purple-600 rounded-full flex items-center justify-center">
                   <span className="text-lg font-bold text-white">A</span>
                 </div>
                 <div className="hidden sm:block text-sm text-left">
                   <div className="font-medium text-gray-700">Admin</div>
-                  <div className="text-xs text-gray-500">admin@gmail.com</div>
                 </div>
                 <ChevronDown className="h-4 w-4 text-gray-500 hidden sm:block" />
               </button>
-              
+
               {/* Dropdown menu */}
-              <div className="hidden absolute right-0 mt-2 w-48 rounded-lg bg-white shadow-lg ring-1 ring-black ring-opacity-5">
-                <div className="py-1">
-                  <a href="#" className="block px-4 py-2 text-sm text-indigo-600 hover:bg-gray-100">
-                    Sign out
-                  </a>
+              {isDropdownOpen && (
+                <div className="absolute right-0 mt-2 w-48 rounded-lg bg-white shadow-lg ring-1 ring-black ring-opacity-5">
+                  
+                  <div className="py-1" onClick={() => dispatch(LogoutThunk())}>
+                    <p className="block px-4 py-2 text-sm text-indigo-600 hover:bg-gray-100">
+                      Sign out
+                    </p>
+                  </div>
                 </div>
-              </div>
+              )}
             </div>
           </div>
         </div>

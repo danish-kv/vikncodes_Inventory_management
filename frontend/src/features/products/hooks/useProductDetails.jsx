@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
-import { fetchProducts } from "../services/productService";
+import { fetchProductDetails } from "../services/productService";
 
-const useProducts = () => {
+const useProductDetails = (slug) => {
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(false);
   const [errors, setErrors] = useState(null);
@@ -9,7 +9,7 @@ const useProducts = () => {
   const getProducts = async () => {
     setLoading(true);
     try {
-      const data = await fetchProducts();
+      const data = await fetchProductDetails(slug);
       setProducts(data);
       console.log(data);
       
@@ -28,4 +28,4 @@ const useProducts = () => {
   return { products, loading, errors, getProducts };
 };
 
-export default useProducts;
+export default useProductDetails;

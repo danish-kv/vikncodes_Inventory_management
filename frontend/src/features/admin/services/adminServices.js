@@ -11,6 +11,11 @@ export const fetchUsers = async () => {
     return res.data
 }
 
+export const fetchVariant = async (slug) => {
+    const res = await api.get(`/api/product/${slug}/variants/`)
+    return res.data
+}
+
 
 
 

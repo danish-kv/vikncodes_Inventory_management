@@ -7,6 +7,6 @@ export const fetchProducts = async () =>{
 
 
 export const fetchProductDetails = async (slug) =>{
-    const res = await api.get(`api/product/{slug}/`)
+    const res = await api.get(`api/product/${slug}/`)
     return res.data
 }

@@ -42,7 +42,7 @@ const AdminLoginPage = () => {
       }
 
       if (res.meta.requestStatus === "fulfilled") {
-        navigate("/admin/dashboard");
+        navigate("/admin");
       }
     } catch (error) {
       console.log("catch error ===", error);

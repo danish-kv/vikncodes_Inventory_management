@@ -35,6 +35,7 @@ class ProductViewSet(ModelViewSet):
     queryset = Products.objects.all().select_related('product_category')
     serializer_class = ProductSerializer
     lookup_field = 'slug'
+    pagination_class = CustomPagination
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, OrderingFilter]
     filterset_fields = ['Category']
     search_fields = ['ProductName', 'ProductCode']

@@ -2,6 +2,7 @@ import React from "react";
 import { Filter, Search } from "lucide-react";
 
 const ProductsFilterBar = ({
+  categories,
   selectedCategory,
   setSelectedCategory,
   sortBy,
@@ -28,9 +29,17 @@ const ProductsFilterBar = ({
           onChange={(e) => setSelectedCategory(e.target.value)}
           className="rounded-lg border-gray-300 py-2 px-3 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
         >
-          <option value="all">All Categories</option>
-          <option value="electronics">Electronics</option>
-          <option value="clothing">Clothing</option>
+          <option onClick={() => setSelectedCategory(null)} disabled value="">
+            All Categories
+          </option>
+          {categories &&
+            categories.map((cat) => {
+              return (
+                <option key={cat.id} value={cat.slug}>
+                  {cat.name}
+                </option>
+              );
+            })}
         </select>
 
         <select
@@ -38,10 +47,10 @@ const ProductsFilterBar = ({
           onChange={(e) => setSortBy(e.target.value)}
           className="rounded-lg border-gray-300 py-2 px-3 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
         >
-          <option value="newest">Newest First</option>
-          <option value="oldest">Oldest First</option>
-          <option value="price-high">Price: High to Low</option>
-          <option value="price-low">Price: Low to High</option>
+          <option value="-created_at">Newest First</option>
+          <option value="created_at">Oldest First</option>
+          <option value="-Price">Price: High to Low</option>
+          <option value="Price">Price: Low to High</option>
         </select>
       </div>
     </div>

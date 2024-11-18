@@ -14,31 +14,30 @@ import useCategories from "../../products/hooks/useCategory";
 
 export const AdminProducts = () => {
   const navigate = useNavigate();
-  const [selectedCategory, setSelectedCategory] = useState("all");
-  const [sortBy, setSortBy] = useState("newest");
+  const [selectedCategory, setSelectedCategory] = useState("");
+  const [sortBy, setSortBy] = useState("");
   const [searchTerm, setSearchTerm] = useState("");
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   const [IsLoading, setIsLoading] = useState(false);
-  const { products, getProducts } = useProducts();
-  const {categories} = useCategories()
-  const { dashboard } = useDashboard();
-  console.log(dashboard);
 
-  console.log(searchTerm);
+  const { products, getProducts, page, setPage, totalPages } = useProducts();
+
+  const { categories } = useCategories();
+  const { dashboard } = useDashboard();
+  console.log("product ====", products);
 
   useEffect(() => {
     const delay = setTimeout(() => {
-      getProducts(searchTerm);
+      getProducts(searchTerm, selectedCategory, sortBy, page);
     }, 500);
 
     return () => clearTimeout(delay);
-  }, [searchTerm]);
+  }, [searchTerm, selectedCategory, sortBy, page]);
 
   const handleAddProduct = async (product) => {
     setIsLoading(true);
     try {
       const res = await api.post("/api/product/", product);
-      console.log("res == ", res);
       if (res.status === 201) {
         getProducts();
         setIsDrawerOpen(false);
@@ -57,7 +56,6 @@ export const AdminProducts = () => {
       const res = await api.patch(`/api/product/${slug}/`, {
         IsActive: !current_status,
       });
-      console.log(res);
       getProducts();
       showToast(200, "Status changed...");
     } catch (error) {
@@ -91,6 +89,7 @@ export const AdminProducts = () => {
           <StatsGrid data={dashboard} />
 
           <ProductsFilterBar
+            categories={categories}
             selectedCategory={selectedCategory}
             setSelectedCategory={setSelectedCategory}
             sortBy={sortBy}
@@ -105,11 +104,13 @@ export const AdminProducts = () => {
             onBlock={handleBlock}
           />
 
-          <Pagination
-            products={products}
-            itemsPerPage={5}
-            onPageChange={(page) => console.log("Page changed to:", page)}
-          />
+          {products && products.length > 0 && (
+            <Pagination
+              currentPage={page}
+              totalPages={totalPages}
+              onPageChange={setPage}
+            />
+          )}
 
           <AddProductDrawer
             isOpen={isDrawerOpen}

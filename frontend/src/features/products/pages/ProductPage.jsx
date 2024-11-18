@@ -8,25 +8,24 @@ import useProducts from "../hooks/useProducts";
 import useCategories from "../hooks/useCategory";
 import api from "../../../services/api";
 import { showToast } from "../../../utils/showToast";
+import Pagination from "../../admin/components/Pagination";
 
 const ProductPage = () => {
   const [selectedProduct, setSelectedProduct] = useState(null);
   const [searchTerm, setSearchTerm] = useState("");
   const [isDetailOpen, setIsDetailOpen] = useState("");
   const [selectedCategory, setSelectedCategory] = useState(null);
-  const { products, loading, getProducts } = useProducts();
+  const [sortBy, setSortBy] = useState(null);
+  const { products, getProducts, page, setPage, totalPages } = useProducts();
   const { categories } = useCategories();
-  console.log("prodcuts ===== ", products);
 
   useEffect(() => {
     const delay = setTimeout(() => {
-      getProducts(searchTerm, selectedCategory);
+      getProducts(searchTerm, selectedCategory, sortBy, page);
     }, 500);
     return () => clearTimeout(delay);
-  }, [searchTerm, selectedCategory]);
+  }, [searchTerm, selectedCategory, sortBy, page]);
 
-  
-  
   const handlePurchase = async (product, quantity, variants) => {
     try {
       const selectedStockId = Object.values(variants)[0];
@@ -39,10 +38,7 @@ const ProductPage = () => {
         quantity: quantity,
       };
 
-      console.log("data ====", data);
-
       const res = await api.post("/api/purchase/", data);
-
       if (res.status === 201) {
         showToast(200, "Purchase successful!");
       }
@@ -61,13 +57,12 @@ const ProductPage = () => {
   const handleCloseDetailSlide = () => {
     setIsDetailOpen(false);
   };
-  
+
   const handleFavorite = () => {};
 
   return (
     <div className="min-h-screen bg-gray-50">
       <Header />
-
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="flex items-center gap-4 mb-8">
           <div className="flex-1 relative">
@@ -107,6 +102,14 @@ const ProductPage = () => {
           ))}
         </div>
       </main>
+
+      {products && products.length > 0 && (
+        <Pagination
+          currentPage={page}
+          totalPages={totalPages}
+          onPageChange={setPage}
+        />
+      )}
 
       {isDetailOpen && selectedProduct && (
         <ProductDetailSlide

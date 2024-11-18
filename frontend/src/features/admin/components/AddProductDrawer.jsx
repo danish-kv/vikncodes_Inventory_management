@@ -2,14 +2,20 @@ import React, { useState } from "react";
 import { X, Upload } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 
-const AddProductDrawer = ({ isOpen, onClose, onSubmit, IsLoading }) => {
+const AddProductDrawer = ({
+  isOpen,
+  onClose,
+  onSubmit,
+  IsLoading,
+  categories,
+}) => {
   const [productData, setProductData] = useState({
     ProductCode: "",
     ProductID: "",
     ProductName: "",
     ProductImage: null,
     Description: "",
-    Category: 1,
+    Category: null,
     Price: "",
     HSNCode: "",
   });
@@ -24,14 +30,26 @@ const AddProductDrawer = ({ isOpen, onClose, onSubmit, IsLoading }) => {
     }
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     const formData = new FormData();
 
     Object.keys(productData).forEach((key) => {
       formData.append(key, productData[key]);
     });
-    onSubmit(formData);
+    await onSubmit(formData);
+
+    setProductData({
+      ProductCode: "",
+      ProductID: "",
+      ProductName: "",
+      ProductImage: null,
+      Description: "",
+      Category: null,
+      Price: "",
+      HSNCode: "",
+    });
+    setPreviewImage(null);
   };
 
   return (
@@ -144,17 +162,25 @@ const AddProductDrawer = ({ isOpen, onClose, onSubmit, IsLoading }) => {
                     </label>
                     <select
                       value={productData.Category}
-                      onChange={(e) =>
+                      onChange={(e) => {
                         setProductData({
                           ...productData,
-                          Category: e.target.value,
-                        })
-                      }
+                          Category: Number(e.target.value), // Ensure it's a number
+                        });
+                      }}
                       className="mt-1 block w-full rounded-lg border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
                     >
-                      <option value="">Select Category</option>
-                      <option value="1">Electronics</option>
-                      <option value="2">Clothing</option>
+                      <option hidden value="">
+                        Select Category
+                      </option>
+                      {categories &&
+                        categories.map((cat) => {
+                          return (
+                            <option key={cat.id} value={cat.id}>
+                              {cat.name}
+                            </option>
+                          );
+                        })}
                     </select>
                   </div>
                   <div>
@@ -241,8 +267,9 @@ const AddProductDrawer = ({ isOpen, onClose, onSubmit, IsLoading }) => {
                   <button
                     type="submit"
                     className="px-4 py-2 border border-transparent rounded-lg text-sm font-medium text-white bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700"
-               disabled={IsLoading}   >
-                    {IsLoading ? 'Loading' :"Save Product"}
+                    disabled={IsLoading}
+                  >
+                    {IsLoading ? "Loading" : "Save Product"}
                   </button>
                 </div>
               </form>

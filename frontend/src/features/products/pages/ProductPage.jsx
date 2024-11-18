@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Search, Filter } from "lucide-react";
 import Header from "../../../common/Header";
 import ProductCard from "../components/ProductCard";
@@ -11,28 +11,29 @@ import { showToast } from "../../../utils/showToast";
 
 const ProductPage = () => {
   const [selectedProduct, setSelectedProduct] = useState(null);
-  const [searchQuery, setSearchQuery] = useState("");
+  const [searchTerm, setSearchTerm] = useState("");
   const [isDetailOpen, setIsDetailOpen] = useState("");
   const [selectedCategory, setSelectedCategory] = useState(null);
   const { products, loading, getProducts } = useProducts();
   const { categories } = useCategories();
   console.log("prodcuts ===== ", products);
 
-  const handleFavorite = () => {};
+  useEffect(() => {
+    const delay = setTimeout(() => {
+      getProducts(searchTerm, selectedCategory);
+    }, 500);
+    return () => clearTimeout(delay);
+  }, [searchTerm, selectedCategory]);
 
+  
+  
   const handlePurchase = async (product, quantity, variants) => {
     try {
-      // Ensure only one stock ID is selected
       const selectedStockId = Object.values(variants)[0];
-      console.log("variNt ===", Object.values(variants)[0]);
-      console.log("quantiy  ===", quantity);
-      console.log("var sele ===", selectedStockId);
-
       if (!selectedStockId) {
         showToast(100, "Please select a valid stock variant.");
         return;
       }
-
       const data = {
         stock_id: selectedStockId,
         quantity: quantity,
@@ -60,13 +61,14 @@ const ProductPage = () => {
   const handleCloseDetailSlide = () => {
     setIsDetailOpen(false);
   };
+  
+  const handleFavorite = () => {};
 
   return (
     <div className="min-h-screen bg-gray-50">
       <Header />
-      {/* Main Content */}
+
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {/* Search and Filter Bar */}
         <div className="flex items-center gap-4 mb-8">
           <div className="flex-1 relative">
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-5 w-5" />
@@ -74,8 +76,8 @@ const ProductPage = () => {
               type="text"
               placeholder="Search products..."
               className="w-full pl-10 pr-4 py-3 rounded-xl border-2 border-gray-200 focus:border-indigo-600 focus:ring-0 transition-colors"
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
             />
           </div>
           <button className="p-3 rounded-xl bg-white border-2 border-gray-200 hover:border-indigo-600 transition-colors">

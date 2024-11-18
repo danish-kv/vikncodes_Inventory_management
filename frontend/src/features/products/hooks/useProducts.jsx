@@ -6,13 +6,15 @@ const useProducts = () => {
   const [loading, setLoading] = useState(false);
   const [errors, setErrors] = useState(null);
 
-  const getProducts = async (searchTerm='') => {
+  const getProducts = async (searchTerm = "", category = null) => {
     setLoading(true);
     try {
-      const data = await fetchProducts(searchTerm);
+      const params = {};
+      if (searchTerm) params.search = searchTerm;
+      if (category) params.category = category;
+      const data = await fetchProducts(params);
       setProducts(data);
       console.log(data);
-      
     } catch (error) {
       console.log(error);
       setErrors(error);

@@ -11,11 +11,13 @@ import ProductDetailsImage from "../components/productDetails/ProductDetailsImag
 import ProductDetailsInfo from "../components/productDetails/ProductDetailsInfo";
 import ProductDetailsHeader from "../components/productDetails/ProductDetailsHeader";
 import VariantsList from "../components/productDetails/VariantsList";
+import useCategories from "../../products/hooks/useCategory";
 
 const ProductDetails = () => {
   const { slug } = useParams();
   const { variants, loading, getVariants } = useVariants(slug);
   const { products, getProducts } = useProductDetails(slug);
+  const {categories} = useCategories()
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedVariant, setSelectedVariant] = useState(null);
   const [subVariantToEdit, setSubVariantToEdit] = useState(null);
@@ -188,6 +190,7 @@ const ProductDetails = () => {
         onClose={() => setIsEditDrawerOpen(false)}
         onSubmit={handleEditProduct}
         productData={selectedProduct}
+        categories={categories}
       />
     </div>
   );

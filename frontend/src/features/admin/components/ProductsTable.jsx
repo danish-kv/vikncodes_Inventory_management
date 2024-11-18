@@ -72,7 +72,7 @@ export const ProductsTable = ({ products, onView, onBlock }) => {
                 <div className="flex items-center">
                   <span
                     className={`ml-2 text-sm text-gray-500 ${
-                      product.TotalStock > 50
+                      product.TotalStock > 30
                         ? "text-green-500"
                         : product.TotalStock > 20
                         ? "text-yellow-500"

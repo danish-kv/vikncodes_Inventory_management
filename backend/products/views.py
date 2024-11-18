@@ -19,22 +19,55 @@ from django.db import transaction
 # Create your views here.
 
 
+from django_filters.rest_framework import DjangoFilterBackend
+from rest_framework import filters, status
+from rest_framework.response import Response
+from rest_framework.viewsets import ModelViewSet
+
+
+
 class ProductViewSet(ModelViewSet):
-    queryset = Products.objects.all()
+    queryset = Products.objects.all().select_related('product_category')
     serializer_class = ProductSerializer
     lookup_field = 'slug'
-    # pagination_class = CustomPagination
     filter_backends = [DjangoFilterBackend, filters.SearchFilter]
-    search_fields = ['ProductName', 'ProductCode']  
+    filterset_fields = ["Category"]
+    search_fields = ['ProductName', 'ProductCode']
 
-    
     def create(self, request, *args, **kwargs):
+        # Automatically assign the current user as the creator
         data = request.data.copy()
         data['CreatedUser'] = request.user.id
         serializer = self.get_serializer(data=data)
         serializer.is_valid(raise_exception=True)
         self.perform_create(serializer)
         return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+    def get_queryset(self):
+        """
+        Customize the queryset based on user type and additional query params.
+        """
+        user = self.request.user
+        category_slug = self.request.query_params.get('category', None)
+        search_query = self.request.query_params.get('search', None)
+
+        # Start with all products for superusers, else only active ones
+        queryset = (
+            Products.objects.all()
+            if user.is_superuser else
+            Products.objects.filter(IsActive=True)
+        )
+
+        # category filter 
+        if category_slug:
+            queryset = queryset.filter(Category__slug=category_slug)
+
+        # search filtering 
+        if search_query:
+            queryset = queryset.filter(ProductName__icontains=search_query)
+
+        return queryset
+
 
 
 class CategoryViewSet(ModelViewSet):

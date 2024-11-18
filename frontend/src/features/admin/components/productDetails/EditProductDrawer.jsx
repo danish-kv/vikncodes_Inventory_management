@@ -8,6 +8,7 @@ const EditProductDrawer = ({
   onSubmit,
   isLoading,
   productData,
+  categories,
 }) => {
   const [product, setProduct] = useState({
     ProductCode: "",
@@ -27,7 +28,7 @@ const EditProductDrawer = ({
     if (isOpen && productData) {
       setProduct(productData);
       setPreviewImage(productData?.ProductImage || null);
-      setIsImageChanged(false); // Reset image changed flag when drawer opens
+      setIsImageChanged(false);
     }
   }, [isOpen, productData]);
 
@@ -44,14 +45,12 @@ const EditProductDrawer = ({
     e.preventDefault();
     const formData = new FormData();
 
-    // Add all product fields except ProductImage
     Object.keys(product).forEach((key) => {
       if (key !== "ProductImage") {
         formData.append(key, product[key]);
       }
     });
 
-    // Only append ProductImage if a new image was selected
     if (isImageChanged && product.ProductImage instanceof File) {
       formData.append("ProductImage", product.ProductImage);
     }
@@ -179,20 +178,29 @@ const EditProductDrawer = ({
                       Category
                     </label>
                     <select
-                      value={product.Category}
-                      onChange={(e) =>
+                      value={productData.Category}
+                      onChange={(e) => {
                         setProduct({
                           ...product,
-                          Category: e.target.value,
-                        })
-                      }
+                          Category: Number(e.target.value),
+                        });
+                      }}
                       className="mt-1 block w-full rounded-lg border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
                     >
-                      <option value="">Select Category</option>
-                      <option value="1">Electronics</option>
-                      <option value="2">Clothing</option>
+                      <option hidden value="">
+                        Select Category
+                      </option>
+                      {categories &&
+                        categories.map((cat) => {
+                          return (
+                            <option key={cat.id} value={cat.id}>
+                              {cat.name}
+                            </option>
+                          );
+                        })}
                     </select>
                   </div>
+
                   <div>
                     <label className="block text-sm font-medium text-gray-700">
                       Price
@@ -203,7 +211,7 @@ const EditProductDrawer = ({
                       onChange={(e) =>
                         setProduct({
                           ...product,
-                          Price: e.target.value,
+                          Price: Number(e.target.value),
                         })
                       }
                       className="mt-1 block w-full rounded-lg border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"

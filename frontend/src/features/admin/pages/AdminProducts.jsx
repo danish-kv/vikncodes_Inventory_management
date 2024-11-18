@@ -10,6 +10,7 @@ import ProductsFilterBar from "../components/ProductsFilterBar";
 import Pagination from "../components/Pagination";
 import { ProductsTable } from "../components/ProductsTable";
 import useDashboard from "../hooks/useDashboard";
+import useCategories from "../../products/hooks/useCategory";
 
 export const AdminProducts = () => {
   const navigate = useNavigate();
@@ -19,6 +20,7 @@ export const AdminProducts = () => {
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   const [IsLoading, setIsLoading] = useState(false);
   const { products, getProducts } = useProducts();
+  const {categories} = useCategories()
   const { dashboard } = useDashboard();
   console.log(dashboard);
 
@@ -50,9 +52,9 @@ export const AdminProducts = () => {
     }
   };
 
-  const handleBlock = async (id, current_status) => {
+  const handleBlock = async (slug, current_status) => {
     try {
-      const res = await api.patch(`/api/product/${id}/`, {
+      const res = await api.patch(`/api/product/${slug}/`, {
         IsActive: !current_status,
       });
       console.log(res);
@@ -114,6 +116,7 @@ export const AdminProducts = () => {
             onClose={() => setIsDrawerOpen(false)}
             onSubmit={handleAddProduct}
             IsLoading={IsLoading}
+            categories={categories}
           />
         </div>
       </div>

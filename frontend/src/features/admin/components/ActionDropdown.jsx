@@ -21,7 +21,7 @@ const ActionDropdown = ({ product, onView, onBlock }) => {
         </button>
 
         <button
-          onClick={() => onBlock(product.id, product.IsActive)}
+          onClick={() => onBlock(product.slug, product.IsActive)}
           className="flex w-full items-center px-4 py-2 text-sm hover:bg-gray-100 rounded-lg"
         >
           {product.IsActive ? (

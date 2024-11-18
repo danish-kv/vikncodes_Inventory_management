@@ -1,80 +1,65 @@
 import React, { useState } from "react";
-import { Search, Filter, ArrowLeft, ArrowRight } from "lucide-react";
+import { Search, Filter } from "lucide-react";
 import Header from "../../../common/Header";
 import ProductCard from "../components/ProductCard";
 import ProductDetailSlide from "../components/ProductDetailsSlider";
 import ProductCategory from "../components/ProductCategory";
 import useProducts from "../hooks/useProducts";
+import useCategories from "../hooks/useCategory";
+import api from "../../../services/api";
+import { showToast } from "../../../utils/showToast";
 
 const ProductPage = () => {
   const [selectedProduct, setSelectedProduct] = useState(null);
   const [searchQuery, setSearchQuery] = useState("");
-
+  const [isDetailOpen, setIsDetailOpen] = useState("");
   const [selectedCategory, setSelectedCategory] = useState(null);
-  const [categories, setCategories] = useState([
-    { id: 1, name: "Electronics" },
-    { id: 2, name: "Furniture" },
-    { id: 3, name: "Clothing" },
-    { id: 4, name: "Books" },
-    { id: 5, name: "Sports" },
-    { id: 6, name: "Kitchen" },
-    { id: 7, name: "Beauty" },
-    { id: 8, name: "Toys" },
-  ]);
+  const { products, loading, getProducts } = useProducts();
+  const { categories } = useCategories();
+  console.log("prodcuts ===== ", products);
 
-  const {products, loading, getProducts} = useProducts()
-  console.log('prodcuts ===== ', products);
-  
+  const handleFavorite = () => {};
 
-  const handleToggleFavorite = async (productId) => {
+  const handlePurchase = async (product, quantity, variants) => {
     try {
-      // Make API call to toggle favorite status
-      // const response = await fetch(`/api/products/${productId}/favorite`, {
-      //   method: 'POST',
-      //   headers: {
-      //     'Content-Type': 'application/json',
-      //   },
-      // });
+      // Ensure only one stock ID is selected
+      const selectedStockId = Object.values(variants)[0];
+      console.log("variNt ===", Object.values(variants)[0]);
+      console.log("quantiy  ===", quantity);
+      console.log("var sele ===", selectedStockId);
 
-      // If API call is successful, update local state
-      const updatedProducts = products.map((product) =>
-        product.id === productId
-          ? { ...product, IsFavourite: !product.IsFavourite }
-          : product
-      );
+      if (!selectedStockId) {
+        showToast(100, "Please select a valid stock variant.");
+        return;
+      }
 
-      // Update your products state here
-      // setProducts(updatedProducts);
+      const data = {
+        stock_id: selectedStockId,
+        quantity: quantity,
+      };
 
-      // If product detail is open, update that too
-      if (selectedProduct?.id === productId) {
-        setSelectedProduct((prevProduct) => ({
-          ...prevProduct,
-          IsFavourite: !prevProduct.IsFavourite,
-        }));
+      console.log("data ====", data);
+
+      const res = await api.post("/api/purchase/", data);
+
+      if (res.status === 201) {
+        showToast(200, "Purchase successful!");
       }
     } catch (error) {
-      console.error("Error toggling favorite:", error);
-      // Handle error (show toast notification, etc.)
+      console.error(
+        "Purchase failed:",
+        error.response?.data?.error || error.message
+      );
+      showToast(
+        400,
+        error.response?.data?.error || "An error occurred. Please try again."
+      );
     }
   };
 
-  const handleAddToCart = (product, quantity, selectedVariants) => {
-    // Implement your cart logic here
-    console.log("Adding to cart:", { product, quantity, selectedVariants });
+  const handleCloseDetailSlide = () => {
+    setIsDetailOpen(false);
   };
-
-  const scrollCategories = (direction) => {
-    const container = document.getElementById("categories-container");
-    const scrollAmount = direction === "left" ? -200 : 200;
-    container.scrollBy({ left: scrollAmount, behavior: "smooth" });
-  };
-
-  // const filteredProducts = products.filter(
-  //   (product) =>
-  //     product.ProductName.toLowerCase().includes(searchQuery.toLowerCase()) ||
-  //     product.ProductCode.toLowerCase().includes(searchQuery.toLowerCase())
-  // );
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -111,20 +96,24 @@ const ProductPage = () => {
             <ProductCard
               key={product.id}
               product={product}
-              onViewDetails={setSelectedProduct}
-              onToggleFavorite={handleToggleFavorite}
+              onViewDetails={() => {
+                setSelectedProduct(product);
+                setIsDetailOpen(true);
+              }}
+              onFavorite={handleFavorite}
             />
           ))}
         </div>
       </main>
 
-      {/* Product Detail Slide Panel */}
-      {selectedProduct && (
+      {isDetailOpen && selectedProduct && (
         <ProductDetailSlide
           product={selectedProduct}
-          onClose={() => setSelectedProduct(null)}
-          onAddToCart={handleAddToCart}
-          onToggleFavorite={handleToggleFavorite}
+          onClose={handleCloseDetailSlide}
+          onPurchase={(product, quantity, variants) =>
+            handlePurchase(product, quantity, variants)
+          }
+          onFavorite={handleFavorite}
         />
       )}
     </div>

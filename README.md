@@ -143,20 +143,20 @@ Here's a brief guide on how to use the application:
 
 
 Landing Page
-![alt text](image-3.png)
+![alt text](documentation/image-3.png)
 
 Userside Produt Listing
-![alt text](image-4.png)
-![alt text](image-5.png)
+![alt text](documentation/image-4.png)
+![alt text](documentation/image-5.png)
 
 Product Dashboard
-![alt text](image.png)
+![alt text](documentation/image.png)
 
 Product Details
-![alt text](image-1.png)
+![alt text](documentation/image-1.png)
 
 User Management
-![alt text](image-2.png)
+![alt text](documentation/image-2.png)
 
 
 

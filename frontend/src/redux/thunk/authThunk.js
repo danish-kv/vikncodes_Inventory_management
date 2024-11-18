@@ -7,12 +7,11 @@ export const LoginThunk = createAsyncThunk(
   async (data, { rejectWithValue }) => {
     try {
       const res = await authService.login(data.email, data.password);
-      console.log(res);
+      console.log('Login Thunkk===========',res);
       
-      localStorage.setItem("access", res.access);
-      localStorage.setItem("refresh", res.refresh);
+      localStorage.setItem("access", res.access_token);
+      localStorage.setItem("refresh", res.refresh_token);
       localStorage.setItem("user", res.user);
-      localStorage.setItem("userID", res.userID);
       return res;
     } catch (error) {
       console.log("Login Thunk error", error);

@@ -23,7 +23,7 @@ api.interceptors.request.use(
 const refreshToken = async (refresh) => {
   try {
     const res = await axios.post(
-      `${import.meta.env.VITE_BASE_URL}token/refresh`,
+      `${import.meta.env.VITE_BASE_URL}/api/token/refresh/`,
       {
         refresh: refresh,
       }
@@ -68,7 +68,7 @@ api.interceptors.response.use(
           return Promise.reject(err);
         }
       } else {
-        // window.location.href = "/login";
+        window.location.href = "/login";
         return Promise.reject(error);
       }
     }

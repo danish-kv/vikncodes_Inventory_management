@@ -5,6 +5,7 @@ import { useDispatch } from "react-redux";
 import { LoginThunk } from "../../../redux/thunk/authThunk";
 import { showToast } from "../../../utils/showToast";
 import { toggleOtpAccess } from "../../../redux/slices/authSlice";
+import LoadingDotStream from "../../../common/Loading";
 
 const LoginPage = () => {
   const [showPassword, setShowPassword] = useState(false);
@@ -148,14 +149,14 @@ const LoginPage = () => {
               </label>
             </div>
 
-            <div className="text-sm">
+            {/* <div className="text-sm">
               <Link
                 to="/forgot-password"
                 className="font-medium text-indigo-600 hover:text-indigo-500"
               >
                 Forgot password?
               </Link>
-            </div>
+            </div> */}
           </div>
 
           <button
@@ -166,7 +167,7 @@ const LoginPage = () => {
             transition-all duration-200"
             disabled={loading}
           >
-            Sign in to Invenio
+            {loading ? <LoadingDotStream /> : 'Sign in to Invenio'}
           </button>
         </form>
 

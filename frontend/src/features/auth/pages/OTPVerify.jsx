@@ -4,12 +4,14 @@ import api from "../../../services/api";
 import { useDispatch, useSelector } from "react-redux";
 import { toggleOtpAccess } from "../../../redux/slices/authSlice";
 import { showToast } from "../../../utils/showToast";
+import LoadingDotStream from "../../../common/Loading";
 
 const OTPVerify = () => {
   const [otp, setOtp] = useState(["", "", "", "", ""]);
+  const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
   const location = useLocation();
-  const dispatch = useDispatch()
+  const dispatch = useDispatch();
 
   const { otp_access } = useSelector((state) => state.auth);
   const { email } = location.state || {};
@@ -47,19 +49,25 @@ const OTPVerify = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setLoading(true);
     const otpString = otp.join("");
     if (otpString.length === 5) {
       try {
-        const res = await api.post("/api/otp-verify/", { email: email, otp: otpString });
-        if(res.status == 200){
-            dispatch(toggleOtpAccess(false))
-            showToast(200, 'OTP verified successfully!')
-            navigate('/login')
+        const res = await api.post("/api/otp-verify/", {
+          email: email,
+          otp: otpString,
+        });
+        if (res.status == 200) {
+          dispatch(toggleOtpAccess(false));
+          showToast(200, "OTP verified successfully!");
+          navigate("/login");
         }
         console.log(res);
       } catch (error) {
         console.log(error);
-        showToast(400, 'Failed to verify OTP, Please try again')
+        showToast(400, "Failed to verify OTP, Please try again");
+      } finally {
+        setLoading(false);
       }
     }
   };
@@ -101,8 +109,9 @@ const OTPVerify = () => {
           <button
             type="submit"
             className="w-full flex justify-center py-3 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+            disabled={loading}
           >
-            Verify Email
+            {loading ? <LoadingDotStream /> : "Verify Email"}
           </button>
         </form>
       </div>

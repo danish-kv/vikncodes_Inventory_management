@@ -1,23 +1,27 @@
 from django.shortcuts import render
 from django.contrib.auth import get_user_model
-from rest_framework.request import Request
+from rest_framework import status, filters
 from rest_framework.viewsets import ModelViewSet
 from rest_framework.permissions import AllowAny
-from rest_framework import status
 from rest_framework.response import Response
 from .serializers import UserSerializer, CustomTokenObtainPairSerializer
 from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework_simplejwt.views import TokenObtainPairView
 from rest_framework_simplejwt.exceptions import TokenError
 from rest_framework.views import APIView
+from django_filters.rest_framework import DjangoFilterBackend
+from common.base_pagination import CustomPagination
 # Create your views here.
 
 CustomUser = get_user_model()
 
 class RegisterViewSet(ModelViewSet):
-    queryset = CustomUser.objects.all()
+    queryset = CustomUser.objects.all().exclude(is_superuser=True)
     serializer_class = UserSerializer
     permission_classes = [AllowAny]
+    pagination_class = CustomPagination
+    filter_backends = [DjangoFilterBackend, filters.SearchFilter]
+    search_fields = ['email', 'username']  
 
     def create(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
@@ -58,7 +62,7 @@ class OTPVerifiy(APIView):
         return Response(data='Invalid OTP', status=status.HTTP_400_BAD_REQUEST)
     
 
-class Logout(APIView):
+class LogoutAPIView(APIView):
     def post(self, request):
         try:
             refresh = request.data.get('refresh')

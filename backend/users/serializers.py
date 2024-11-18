@@ -15,7 +15,7 @@ class UserSerializer(ModelSerializer):
 
     class Meta:
         model = CustomUser
-        fields = ['id', 'username', 'email', 'password']
+        fields = ['id', 'username', 'email', 'password', 'profile', 'last_login', 'is_active', 'is_verified']
 
     def validate_email(self, value):
         return validate_email(value)

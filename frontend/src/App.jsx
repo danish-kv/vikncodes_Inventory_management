@@ -1,12 +1,21 @@
 import React from "react";
 import { BrowserRouter as Router, Route, Routes } from "react-router-dom";
-import NotFoundPage from "./common/NotFoundPage";
-import LandingPage from "./features/home/pages/LandingPage";
 import { Toaster } from "react-hot-toast";
-import OTPVerify from "./features/auth/pages/OTPVerify";
-import RegisterPage from "./features/auth/pages/RegisterPage";
+
+// Common Pages
+import NotFoundPage from "./common/NotFoundPage";
+import NotAuthorizedPage from "./common/NotAuthorizedPage";
+
+// Auth Pages
 import LoginPage from "./features/auth/pages/LoginPage";
+import RegisterPage from "./features/auth/pages/RegisterPage";
+import OTPVerify from "./features/auth/pages/OTPVerify";
+
+// User Pages
+import LandingPage from "./features/home/pages/LandingPage";
 import ProductPage from "./features/products/pages/ProductPage";
+
+// Admin Pages
 import AdminLoginPage from "./features/admin/pages/AdminLoginPage";
 import AdminLayout from "./features/admin/layout/AdminLayout";
 import AdminCategory from "./features/admin/pages/AdminCategory";
@@ -14,26 +23,108 @@ import AdminUsers from "./features/admin/pages/AdminUsers";
 import AdminProducts from "./features/admin/pages/AdminProducts";
 import ProductDetails from "./features/admin/pages/ProductDetails";
 
+// Route Protection Components
+import AuthProtection from "./route/AuthProtection";
+import ProtectedRoute from "./route/ProductedRoute";
+
 const App = () => {
   return (
     <Router>
       <Toaster reverseOrder={false} />
       <Routes>
-        <Route path="/register" element={<RegisterPage />} />
-        <Route path="/login" element={<LoginPage />} />
+        {/* Public Routes */}
+        <Route path="/" element={<LandingPage />} />
+        <Route path="/unauthorized" element={<NotAuthorizedPage />} />
         <Route path="/otp" element={<OTPVerify />} />
 
-        <Route path="/" element={<LandingPage />} />
-        <Route path="/products" element={<ProductPage />} />
+        {/* Auth Routes - Accessible only when NOT logged in */}
+        <Route
+          path="/register"
+          element={
+            <AuthProtection element={<RegisterPage />} redirectTo="/" />
+          }
+        />
+        <Route
+          path="/login"
+          element={
+            <AuthProtection element={<LoginPage />} redirectTo="/" />
+          }
+        />
+        <Route
+          path="/admin/login"
+          element={
+            <AuthProtection
+              element={<AdminLoginPage />}
+              redirectTo="/admin"
+            />
+          }
+        />
 
+        {/* Protected User Routes */}
+        <Route
+          path="/products"
+          element={
+            <ProtectedRoute element={<ProductPage />} role="user" />
+          }
+        />
 
-        <Route path="/admin/login" element={<AdminLoginPage />} />
-        <Route path="/admin/users" element={<AdminLayout ><AdminUsers /></AdminLayout>} />
-        <Route path="/admin" element={<AdminLayout ><AdminProducts /></AdminLayout>} />
-        <Route path="/admin/product/:slug" element={<AdminLayout ><ProductDetails /></AdminLayout>} />
-        <Route path="/admin/categories" element={<AdminLayout ><AdminCategory /></AdminLayout>} />
+        {/* Protected Admin Routes */}
+        <Route path="/admin">
+          <Route
+            index
+            element={
+              <ProtectedRoute
+                element={
+                  <AdminLayout>
+                    <AdminProducts />
+                  </AdminLayout>
+                }
+                role="admin"
+              />
+            }
+          />
+          <Route
+            path="users"
+            element={
+              <ProtectedRoute
+                element={
+                  <AdminLayout>
+                    <AdminUsers />
+                  </AdminLayout>
+                }
+                role="admin"
+              />
+            }
+          />
+          <Route
+            path="product/:slug"
+            element={
+              <ProtectedRoute
+                element={
+                  <AdminLayout>
+                    <ProductDetails />
+                  </AdminLayout>
+                }
+                role="admin"
+              />
+            }
+          />
+          <Route
+            path="categories"
+            element={
+              <ProtectedRoute
+                element={
+                  <AdminLayout>
+                    <AdminCategory />
+                  </AdminLayout>
+                }
+                role="admin"
+              />
+            }
+          />
+        </Route>
 
-
+        {/* Not FOund Route */}
         <Route path="*" element={<NotFoundPage />} />
       </Routes>
     </Router>

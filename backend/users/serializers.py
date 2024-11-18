@@ -46,6 +46,7 @@ class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
 
         if user.is_superuser:
             token['is_admin'] = True
+            token['role'] = 'admin'
         else:        
             token['user'] = user.username
             token['id'] = user.id
@@ -53,6 +54,7 @@ class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
             token['is_active'] = user.is_active 
             token['email'] = user.email
             token['is_verified'] = user.is_verified 
+            token['role'] = 'user'
 
         return token
 
@@ -96,7 +98,8 @@ class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
         data.update({
             'access_token': data.pop('access'),
             'refresh_token': data.pop('refresh'),
-            'user': user.username
+            'user': user.username,
+            'role': 'admin' if user.is_superuser else 'user'
         })
 
         return data

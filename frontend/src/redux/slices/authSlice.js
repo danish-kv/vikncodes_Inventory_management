@@ -8,6 +8,7 @@ const initialState = {
   loading: false,
   error: null,
   otp_access: false,
+  role: null,
 };
 
 const authSlice = createSlice({
@@ -39,9 +40,12 @@ const authSlice = createSlice({
         state.loading = true;
       })
       .addCase(LoginThunk.fulfilled, (state, action) => {
+        console.log('payloadng ===',action.payload);
+        
         state.user = action.payload.user;
         state.userID = action.payload.userID;
         state.profile = action.payload.profile;
+        state.role = action.payload.role;
         state.loading = false;
         state.error = null;
       })
@@ -55,6 +59,7 @@ const authSlice = createSlice({
         state.userID = null;
         state.profile = null;
         state.loading = false;
+        state.role = null;
         state.error = null;
       });
   },

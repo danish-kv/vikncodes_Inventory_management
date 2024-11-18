@@ -5,8 +5,8 @@ from django.conf import settings
 from django.conf.urls.static import static
 from rest_framework.routers import DefaultRouter 
 from rest_framework_simplejwt.views import  TokenRefreshView
-from users.views import RegisterViewSet, CustomTokenObtainPairView, OTPVerifiy
-from products.views import ProductViewSet, CategoryViewSet, SubVariantViewSet, VariantViewSet
+from users.views import RegisterViewSet, CustomTokenObtainPairView, OTPVerifiy, LogoutAPIView
+from products.views import ProductViewSet, CategoryViewSet, SubVariantViewSet, VariantViewSet, ProductVariantView, ProductDashboardAPIView, check_stock, PurchaseAPIView, LandingPage
 
 
 router = DefaultRouter()
@@ -22,7 +22,15 @@ urlpatterns = [
     path('api/',include(router.urls)),
     path('api/token/', CustomTokenObtainPairView.as_view(), name='token_obtain_pair'),
     path('api/token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
-    path('api/otp-verify/', OTPVerifiy.as_view(), name='otp-verify')
+    path('api/otp-verify/', OTPVerifiy.as_view(), name='otp-verify'),
+    path('api/logout/', LogoutAPIView.as_view(), name='logout'),
+
+    path('api/product/<slug:slug>/variants/', ProductVariantView.as_view(), name='variant'),
+    path('api/dashboard/', ProductDashboardAPIView.as_view(), name='dashboard'), 
+    path('api/check-quntity/', check_stock, name='check-quntity'), 
+    path('api/purchase/', PurchaseAPIView.as_view(), name='purchase'), 
+    path('api/landing-page/', LandingPage.as_view(), name='landing-page'),
+
 ]
 
 urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

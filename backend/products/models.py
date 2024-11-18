@@ -6,6 +6,8 @@ from django.conf import settings
 from django.utils.text import slugify
 from common.base_model import BaseModel
 from django.contrib.auth import get_user_model
+from django.db import transaction
+from django.db.models import F
 
 # Create your models here.
 
@@ -14,8 +16,9 @@ CustomUser = get_user_model()
 
 
 class Category(BaseModel):
-    name = models.CharField(max_length=200, unique=True)
-    slug = models.SlugField(unique=True, blank=True, null=True)
+    name = models.CharField(max_length=200, unique=True, db_index=True)
+    slug = models.SlugField(unique=True, blank=True, null=True, db_index=True)
+    is_active = models.BooleanField(default=True)
 
     class Meta:
         verbose_name = 'Category'
@@ -47,7 +50,7 @@ class Products(BaseModel):
     ProductImage = VersatileImageField(upload_to="products/", blank=True, null=True)    
     CreatedUser = models.ForeignKey(settings.AUTH_USER_MODEL, related_name="user%(class)s_objects", on_delete=models.CASCADE)
     IsFavourite = models.BooleanField(default=False)
-    Active = models.BooleanField(default=True)    
+    IsActive = models.BooleanField(default=True)    
     HSNCode = models.CharField(max_length=255, blank=True, null=True)    
     TotalStock = models.DecimalField(default=0.00, max_digits=20, decimal_places=8, blank=True, null=True)
     Description = models.TextField(null=True)
@@ -90,6 +93,7 @@ class Variants(BaseModel):
         verbose_name = 'variant'
         verbose_name_plural = 'variants'
         ordering = ('-created_at',)
+        unique_together = (("product", "name"),)
 
 
 class SubVariants(BaseModel):
@@ -101,16 +105,55 @@ class SubVariants(BaseModel):
         verbose_name = 'sub variant'
         verbose_name_plural = 'sub variants'
         ordering = ('-created_at',)
+        unique_together = (("variant", "option_name"),)
 
 
     def __str__(self) -> str:
         return f"{self.option_name} ({self.variant.name})"
     
 
+
+class Stock(BaseModel):
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4)
+    sub_variant = models.OneToOneField(SubVariants, related_name='stock', on_delete=models.CASCADE)
+    quantity = models.DecimalField(
+        default=0.00, max_digits=20, decimal_places=8, blank=True, null=True
+    )
+
+    class Meta:
+        verbose_name = "Stock"
+        verbose_name_plural = "Stocks"
+
+
+    def add_stock(self, quantity):
+        """
+        Adds stock for this sub-variant.
+        """
+        with transaction.atomic():
+            Stock.objects.filter(id=self.id).update(quantity=F('quantity') + quantity)
+            self.refresh_from_db()  
+
+
+    def remove_stock(self, quantity):
+        """
+        Removes stock for this sub-variant. Prevents negative stock levels.
+        """
+        with transaction.atomic():
+            current_stock = Stock.objects.filter(id=self.id).select_for_update().first()
+
+            if current_stock.quantity < quantity:
+                raise ValueError("Insufficient stock to complete this operation.")
+            Stock.objects.filter(id=self.id).update(quantity=F('quantity')-quantity)
+            self.refresh_from_db()
+
+
+    def __str__(self):
+        return f"{self.sub_variant.option_name} - {self.quantity}"
+
 class Transaction(BaseModel):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
-    user = models.ForeignKey(CustomUser, on_delete=models.CASCADE, related_name='user')
-    variant = models.ForeignKey(SubVariants, on_delete=models.CASCADE, related_name='purchased_product')
+    user = models.ForeignKey(CustomUser, on_delete=models.CASCADE, related_name='transactions')
+    stock = models.ForeignKey(Stock, on_delete=models.CASCADE, related_name='transactions', null=True)
     quantity = models.DecimalField(default=0.00, max_digits=20, decimal_places=8, blank=True, null=True)
     refrence_number = models.CharField(max_length=200, blank=True, null=True)
     total_amount = models.DecimalField(default=0.00, max_digits=20, decimal_places=8, blank=True, null=True)
@@ -120,5 +163,22 @@ class Transaction(BaseModel):
         verbose_name_plural = 'transactions'
         ordering = ('-created_at',)
 
+    
+    def save(self, *args, **kwargs):
+        if self.quantity <= 0:
+            raise ValueError('Quantity must be greater than zero')
+        
+        with transaction.atomic():
+            current_stock = Stock.objects.filter(id=self.stock.id).select_for_update().first()
+            if current_stock.quantity < self.quantity:
+                raise ValueError(f'Not enough stock available.')
+            current_stock.remove_stock(self.quantity)
+        
+        super().save(*args, **kwargs)
+
+    
     def __str__(self):
-        return f"{self.variant.product.ProductName} - {self.quantity} - {self.variant.product.Price}"
+        return (
+            f"{self.stock.sub_variant.variant.product.ProductName} - "
+            f"{self.stock.sub_variant.option_name} - {self.quantity}"
+        )

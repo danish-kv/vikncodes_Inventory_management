@@ -74,6 +74,17 @@ class ProductViewSet(ModelViewSet):
 
         return queryset
 
+    def get_permissions(self):
+        """
+        Restrict permissions based on user roles.
+
+        - Read-only for regular users.
+        - Full access for admin users.
+        """
+        if self.request.method in SAFE_METHODS and not self.request.user.is_superuser:
+            return [IsUser()]
+        return [IsAdmin()]
+
 
 class CategoryViewSet(ModelViewSet):
     """
@@ -103,22 +114,23 @@ class VariantViewSet(ModelViewSet):
 
     queryset = Variants.objects.all()
     serializer_class = VariantSerializer
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsAdmin]
 
 
 class SubVariantViewSet(ModelViewSet):
     """
     Handles CRUD operations for product sub-variants.
     """
-
     queryset = SubVariants.objects.all()
     serializer_class = SubVariantSerializer
+    permission_classes = [IsAdmin]
 
 
 class ProductVariantView(APIView):
     """
     Retrieves details of a product and its variants by slug.
     """
+    permission_classes = [IsAdmin]
 
     def get(self, request, slug):
         product = get_object_or_404(Products, slug=slug)
@@ -187,6 +199,7 @@ class PurchaseAPIView(APIView):
     """
     Handles product purchase transactions.
     """
+    permission_classes = [IsUser]
 
     def post(self, request, *args, **kwargs):
         user = request.user
@@ -224,7 +237,6 @@ class LandingPage(APIView):
     """
     Retrieves aggregate data for the landing page.
     """
-
     def get(self, request, *args, **kwargs):
         total_products = Products.objects.count()
         total_users = CustomUser.objects.count()

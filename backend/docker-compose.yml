@@ -1,0 +1,34 @@
+services:
+  invenio-web:
+    build: .
+    command: ["gunicorn", "--bind", ":8000", "backend.wsgi:application"]
+    volumes:
+      - .:/app
+      - invenio-media_volume:/app/media/
+    ports:
+      - "8000:8000"
+    depends_on:
+      - invenio-db
+    env_file:
+      - .env
+    networks:
+      - invenio-network
+
+  invenio-db:
+    image: postgres
+    volumes:
+      - invenio-db-data:/var/lib/postgresql/data
+    environment:
+      POSTGRES_DB: ${DB_NAME}
+      POSTGRES_USER: ${DB_USER}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+    networks:
+      - invenio-network
+
+volumes:
+  invenio-db-data:
+  invenio-media_volume:
+
+networks:
+  invenio-network:
+    driver: bridge
